@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import auth from "../../firebase/firebase.config";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -15,10 +15,11 @@ const Register = () => {
     const handleRegister = e => {
         e.preventDefault();
 
+        const name = e.target.name.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
         const accepted = e.target.terms.checked;
-        console.log(email, password, accepted);
+        console.log(email, password, accepted, name);
 
         // reset error
         setRegisterError('');
@@ -42,6 +43,20 @@ const Register = () => {
             .then(result => {
                 console.log(result.user);
                 setSuccess('User Created Successfully.');
+
+                // update profile
+                updateProfile(result.user,{
+                    displayName: name,
+                    photoURL: "https://example.com/jane-q-user/profile.jpg"
+                })
+                .then(()=> console.log('Profile updated'))
+                .catch()
+
+                // send verification
+                sendEmailVerification(result.user)
+                    .then(() =>{
+                        alert('Please check your email and verified your account');
+                    })
             })
             .catch(error => {
                 console.error(error);
@@ -54,6 +69,8 @@ const Register = () => {
             <div className="mx-auto md:w-1/2 text-center ">
                 <h2 className="text-3xl mb-5">Please, Register</h2>
                 <form onSubmit={handleRegister}>
+                    <input className="mb-4 border w-3/4 py-2 px-4" placeholder="Your Name" type="text" name="name" id="" required />
+                    <br />
                     <input className="mb-4 border w-3/4 py-2 px-4" placeholder="Email" type="email" name="email" id="" required />
                     <br />
                     <div className="relative">

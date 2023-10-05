@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import auth from "../../firebase/firebase.config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { Link } from "react-router-dom";
 
 
@@ -23,7 +23,12 @@ const Login = () => {
         signInWithEmailAndPassword(auth, email,password)
             .then(result =>{
                 console.log(result.user);
-                setSuccess('User Login Successfully.');
+                if(result.user.emailVerified){
+                    setSuccess('User Login Successfully.');
+                }
+                else{
+                    alert("Please verify your email. ")
+                }
             })
             .catch(error =>{
                 console.error(error);
@@ -43,7 +48,14 @@ const Login = () => {
         }
 
         // send validation email
-        
+        sendPasswordResetEmail(auth,email)
+            .then(() =>{
+                alert('Please check your email');
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+
 
     }
 
